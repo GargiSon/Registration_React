@@ -16,7 +16,7 @@ func GetUsers(client *mongo.Client) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		fmt.Println("/api/users called")
 		w.Header().Set("Content-Type", "application/json")
-		collection := client.Database("React").Collection("user")
+		collection := client.Database("React").Collection("users")
 		ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 		defer cancel()
 		cursor, err := collection.Find(ctx, bson.M{})

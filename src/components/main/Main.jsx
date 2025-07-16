@@ -17,7 +17,7 @@ const Main = () => {
   }, []);
 
   const handleAddUser = () => {
-    navigate('/add-user'); // ✅ redirect to AddUser page
+    navigate('/add-user'); 
   };
 
   return (
