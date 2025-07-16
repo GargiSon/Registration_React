@@ -6,15 +6,15 @@ const AddUser = () => {
   const navigate = useNavigate();
   const [countries, setCountries] = useState([]);
   const [formData, setFormData] = useState({
-    name: '',
+    username: '',
     password: '',
     confirm: '',
     email: '',
     mobile: '',
     address: '',
     gender: '',
-    image: '',
-    sports: '',
+    image: null,
+    sports: [],
     dob: '',
     country: ''
   });
@@ -34,43 +34,84 @@ const AddUser = () => {
   }, []);
 
   const handleChange = (e) => {
-    const { name, value } = e.target;
-    setFormData((prev) => ({
-      ...prev,
-      [name]: value
-    }));
+    const { name, value, type, files } = e.target;
+
+    if (type === 'file') {
+      setFormData((prev) => ({
+        ...prev,
+        [name]: files[0]
+      }));
+    } else if (type === 'checkbox') {
+      const checked = e.target.checked;
+      setFormData((prev) => {
+        const sports = checked
+          ? [...prev.sports, value]
+          : prev.sports.filter((sport) => sport !== value);
+        return { ...prev, sports };
+      });
+    } else {
+      setFormData((prev) => ({
+        ...prev,
+        [name]: value
+      }));
+    }
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
 
+    const form = new FormData();
+    form.append("username", formData.username);
+    form.append("password", formData.password);
+    form.append("confirm", formData.confirm);
+    form.append("email", formData.email);
+    form.append("mobile", formData.mobile);
+    form.append("address", formData.address);
+    form.append("gender", formData.gender);
+    form.append("dob", formData.dob);
+    form.append("country", formData.country);
+
+    // File input
+    if (formData.image instanceof File) {
+      form.append("image", formData.image);
+    }
+
+    // Sports (assume it's a list/array in formData.sports)
+    if (Array.isArray(formData.sports)) {
+      formData.sports.forEach(s => form.append("sports", s));
+    } else if (formData.sports) {
+      form.append("sports", formData.sports);
+    }
+
     try {
-      const res = await fetch('http://localhost:5000/api/users', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(formData)
+      const res = await fetch("http://localhost:5000/api/users", {
+        method: "POST",
+        body: form
       });
 
+      const text = await res.text();
+
       if (res.ok) {
-        alert('User added successfully!');
-        navigate('/');
+        alert("User added successfully!");
+        navigate("/");
       } else {
-        alert('Error adding user');
+        alert(`Error adding user: ${text}`);
       }
     } catch (error) {
-      console.error('Failed to add user:', error);
+      console.error("Failed to add user:", error);
+      alert("Network or server error occurred.");
     }
   };
 
   return (
     <div className="add-user-container">
       <h2>Add New User</h2>
-      <form onSubmit={handleSubmit}>
+      <form onSubmit={handleSubmit} encType="multipart/form-data">
         <table>
           <tbody>
             <tr>
-              <td>Name: <span className="required-star">*</span></td>
-              <td><input name="name" type="text" value={formData.name} onChange={handleChange} required /></td>
+              <td>Username: <span className="required-star">*</span></td>
+              <td><input name="username" type="text" value={formData.username} onChange={handleChange} required /></td>
             </tr>
             <tr>
               <td>Password: <span className="required-star">*</span></td>
@@ -95,21 +136,21 @@ const AddUser = () => {
             <tr>
               <td>Gender: <span className="required-star">*</span></td>
               <td>
-                <select name="gender" value={formData.gender} onChange={handleChange} required>
-                  <option value="">Select</option>
-                  <option value="Male">Male</option>
-                  <option value="Female">Female</option>
-                  <option value="Other">Other</option>
-                </select>
+                <label><input type="radio" name="gender" value="Male" checked={formData.gender === "Male"} onChange={handleChange} required /> Male</label>
+                <label><input type="radio" name="gender" value="Female" checked={formData.gender === "Female"} onChange={handleChange} /> Female</label>
               </td>
             </tr>
             <tr>
               <td>Upload Image:</td>
-              <td><input name="image" type="text" value={formData.image} onChange={handleChange}/></td>
+              <td><input name="image" type="file" accept="image/*" onChange={handleChange} /></td>
             </tr>
             <tr>
               <td>Sports:</td>
-              <td><input name="sports" type="text" value={formData.sports} onChange={handleChange} /></td>
+              <td>
+                <label><input type="checkbox" name="sports" value="basketball" onChange={handleChange} /> Basketball</label>
+                <label><input type="checkbox" name="sports" value="swimming" onChange={handleChange} /> Swimming</label>
+                <label><input type="checkbox" name="sports" value="cricket" onChange={handleChange} /> Cricket</label>
+              </td>
             </tr>
             <tr>
               <td>Date of Birth: <span className="required-star">*</span></td>

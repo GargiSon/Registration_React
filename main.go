@@ -18,6 +18,7 @@ func main() {
 
 	router := mux.NewRouter()
 	router.HandleFunc("/api/users", handlers.GetUsers(client)).Methods("GET")
+	router.HandleFunc("/api/users", handlers.RegisterUserAPI(client)).Methods("POST")
 	router.HandleFunc("/api/countries", handlers.GetCountries).Methods("GET")
 
 	handler := cors.AllowAll().Handler(router)
