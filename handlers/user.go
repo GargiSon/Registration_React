@@ -8,6 +8,7 @@ import (
 	"net/http"
 	"time"
 
+	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"
 )
 
@@ -18,7 +19,7 @@ func GetUsers(client *mongo.Client) http.HandlerFunc {
 		collection := client.Database("React").Collection("user")
 		ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 		defer cancel()
-		cursor, err := collection.Find(ctx, map[string]any{})
+		cursor, err := collection.Find(ctx, bson.M{})
 		if err != nil {
 			fmt.Println("Error finding users:", err)
 			http.Error(w, err.Error(), http.StatusInternalServerError)

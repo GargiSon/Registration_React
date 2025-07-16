@@ -6,17 +6,19 @@ import (
 	"net/http"
 
 	"my-react-app/handlers"
-	db "my-react-app/mongo"
+	"my-react-app/mongo"
 
 	"github.com/gorilla/mux"
 	"github.com/rs/cors"
 )
 
 func main() {
-	client := db.ConnectDB()
+	client := mongo.Connect()
+	mongo.InitMongoData()
 
 	router := mux.NewRouter()
 	router.HandleFunc("/api/users", handlers.GetUsers(client)).Methods("GET")
+	router.HandleFunc("/api/countries", handlers.GetCountries).Methods("GET")
 
 	handler := cors.AllowAll().Handler(router)
 
