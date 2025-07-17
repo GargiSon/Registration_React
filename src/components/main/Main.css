@@ -105,3 +105,17 @@ tbody tr:hover {
   opacity: 0.5;
   cursor: not-allowed;
 }
+
+th {
+  cursor: pointer;
+}
+
+th.sorted {
+  background-color: #aee1f9;
+}
+
+thead {
+  position: sticky;
+  top: 0;
+  z-index: 1;
+}

@@ -15,6 +15,7 @@ type User struct {
 	Country     string             `bson:"country" json:"country"`
 	Image       []byte             `bson:"image,omitempty" json:"image,omitempty"`
 	ImageBase64 string             `json:"imageBase64"`
+	SNo         int                `bson:"-" json:"sno"` // Not stored in DB, only for frontend
 }
 
 type RegisterPageData struct {

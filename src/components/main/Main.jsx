@@ -8,35 +8,49 @@ const Main = () => {
   const [page, setPage] = useState(1);
   const [limit] = useState(5);
   const [total, setTotal] = useState(0);
+  const [sortField, setSortField] = useState('_id');
+  const [sortOrder, setSortOrder] = useState('desc');
   const navigate = useNavigate();
 
   const totalPages = Math.ceil(total / limit);
 
   useEffect(() => {
-    fetchUsers(page);
-  }, [page]);
+    fetchUsers();
+  }, [page, sortField, sortOrder]);
 
-  const fetchUsers = async (page) => {
+  const fetchUsers = async () => {
     try {
-      const response = await getPosts(page, limit);
-      if (response && response.users && Array.isArray(response.users)) {
-        console.log("Fetched Users:", response.users);
+      const response = await getPosts(page, limit, sortField, sortOrder);
+      if (response?.users && Array.isArray(response.users)) {
         setData(response.users);
-        setTotal(response.total || response.users.length);
+        setTotal(response.total || 0);
       } else {
-        console.error("Invalid API response structure:", response);
+        console.error('Invalid API response structure:', response);
         setData([]);
       }
     } catch (err) {
-      console.error("Error Fetching users:", err);
+      console.error('Error Fetching users:', err);
       setData([]);
     }
   };
 
-  const handleAddUser = () => navigate('/add-user');
+  const handleSort = (field) => {
+    if (field === sortField) {
+      setSortOrder((sortOrder === "asc" ? "desc" : "asc"));
+    } else {
+      setSortField(field);
+      setSortOrder("asc");
+    }
+  };
 
+  const handleAddUser = () => navigate('/add-user');
   const handlePrev = () => page > 1 && setPage(page - 1);
   const handleNext = () => page < totalPages && setPage(page + 1);
+
+  const getSortArrow = (field) => {
+    if (sortField !== field) return '';
+    return sortOrder === 'asc' ? ' ↑' : ' ↓';
+  };
 
   return (
     <main>
@@ -46,21 +60,29 @@ const Main = () => {
           + Add User
         </button>
       </div>
-      
+
       {data.length > 0 ? (
         <>
           <table>
             <thead>
               <tr>
-                <th>S. No.</th>
-                <th>Name</th>
-                <th>Email</th>
-                <th>Mobile</th>
+                <th onClick={() => handleSort('_id')} style={{ cursor: 'pointer' }}>
+                  S. No{getSortArrow('_id')}
+                </th>
+                <th onClick={() => handleSort('username')} style={{ cursor: 'pointer' }}>
+                  Name{getSortArrow('username')}
+                </th>
+                <th onClick={() => handleSort('email')} style={{ cursor: 'pointer' }}>
+                  Email{getSortArrow('email')}
+                </th>
+                <th onClick={() => handleSort('mobile')} style={{ cursor: 'pointer' }}>
+                  Mobile{getSortArrow('mobile')}
+                </th>
               </tr>
             </thead>
             <tbody>
               {data.map((user, index) => (
-                <tr key={user._id || index}>
+                <tr key={user._id}>
                   <td>{(page - 1) * limit + index + 1}</td>
                   <td>{user.username}</td>
                   <td>{user.email}</td>
@@ -71,9 +93,15 @@ const Main = () => {
           </table>
 
           <div className="pagination">
-            <button onClick={handlePrev} disabled={page === 1}>Previous</button>
-            <span>Page {page} of {totalPages}</span>
-            <button onClick={handleNext} disabled={page === totalPages}>Next</button>
+            <button onClick={handlePrev} disabled={page === 1}>
+              Previous
+            </button>
+            <span>
+              Page {page} of {totalPages}
+            </span>
+            <button onClick={handleNext} disabled={page === totalPages}>
+              Next
+            </button>
           </div>
         </>
       ) : (
