@@ -52,6 +52,18 @@ const Main = () => {
     return sortOrder === 'asc' ? ' ↑' : ' ↓';
   };
 
+  const handleDeleteUser = async (userId) => {
+  if (window.confirm('Are you sure you want to delete this user?')) {
+    try {
+      await deleteUser(userId);
+      fetchUsers(); // Refresh data after deletion
+    } catch (err) {
+      alert('Failed to delete user');
+    }
+  }
+};
+
+
   return (
     <main>
       <div className="top-bar">
@@ -78,6 +90,7 @@ const Main = () => {
                 <th onClick={() => handleSort('mobile')} style={{ cursor: 'pointer' }}>
                   Mobile{getSortArrow('mobile')}
                 </th>
+                <th>Actions</th>
               </tr>
             </thead>
             <tbody>
@@ -87,6 +100,10 @@ const Main = () => {
                   <td>{user.username}</td>
                   <td>{user.email}</td>
                   <td>{user.mobile}</td>
+                  <td>
+                    <button className='edit' onClick={() => navigate('/edit-user/{$user._id}')}>Edit</button>
+                    <button className='delete' onClick={() => handleDeleteUser(user._id)}>Delete</button>
+                  </td>
                 </tr>
               ))}
             </tbody>
