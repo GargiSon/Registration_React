@@ -5,20 +5,38 @@ import { useNavigate } from 'react-router-dom';
 
 const Main = () => {
   const [data, setData] = useState([]);
+  const [page, setPage] = useState(1);
+  const [limit] = useState(5);
+  const [total, setTotal] = useState(0);
   const navigate = useNavigate();
 
-  useEffect(() => {
-    getPosts()
-      .then((posts) => {
-        console.log("Posts from API:", posts);
-        setData(posts);
-      })
-      .catch((err) => console.error("Fetch failed:", err));
-  }, []);
+  const totalPages = Math.ceil(total / limit);
 
-  const handleAddUser = () => {
-    navigate('/add-user'); 
+  useEffect(() => {
+    fetchUsers(page);
+  }, [page]);
+
+  const fetchUsers = async (page) => {
+    try {
+      const response = await getPosts(page, limit);
+      if (response && response.users && Array.isArray(response.users)) {
+        console.log("Fetched Users:", response.users);
+        setData(response.users);
+        setTotal(response.total || response.users.length);
+      } else {
+        console.error("Invalid API response structure:", response);
+        setData([]);
+      }
+    } catch (err) {
+      console.error("Error Fetching users:", err);
+      setData([]);
+    }
   };
+
+  const handleAddUser = () => navigate('/add-user');
+
+  const handlePrev = () => page > 1 && setPage(page - 1);
+  const handleNext = () => page < totalPages && setPage(page + 1);
 
   return (
     <main>
@@ -30,26 +48,34 @@ const Main = () => {
       </div>
       
       {data.length > 0 ? (
-        <table>
-          <thead>
-            <tr>
-              <th>S. No.</th>
-              <th>Name</th>
-              <th>Email</th>
-              <th>Mobile</th>
-            </tr>
-          </thead>
-          <tbody>
-            {data.map((user, index) => (
-              <tr key={user._id || index}>
-                <td data-label="S. No.">{index + 1}</td>
-                <td data-label="Name">{user.username}</td>
-                <td data-label="Email">{user.email}</td>
-                <td data-label="Mobile">{user.mobile}</td>
+        <>
+          <table>
+            <thead>
+              <tr>
+                <th>S. No.</th>
+                <th>Name</th>
+                <th>Email</th>
+                <th>Mobile</th>
               </tr>
-            ))}
-          </tbody>
-        </table>
+            </thead>
+            <tbody>
+              {data.map((user, index) => (
+                <tr key={user._id || index}>
+                  <td>{(page - 1) * limit + index + 1}</td>
+                  <td>{user.username}</td>
+                  <td>{user.email}</td>
+                  <td>{user.mobile}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+
+          <div className="pagination">
+            <button onClick={handlePrev} disabled={page === 1}>Previous</button>
+            <span>Page {page} of {totalPages}</span>
+            <button onClick={handleNext} disabled={page === totalPages}>Next</button>
+          </div>
+        </>
       ) : (
         <p>No data</p>
       )}

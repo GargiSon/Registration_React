@@ -4,37 +4,48 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"my-react-app/models"
+	"my-react-app/mongo"
 	"net/http"
+	"strconv"
 	"time"
 
-	"go.mongodb.org/mongo-driver/bson"
-	"go.mongodb.org/mongo-driver/mongo"
+	mongodriver "go.mongodb.org/mongo-driver/mongo"
 )
 
-func GetUsers(client *mongo.Client) http.HandlerFunc {
+func GetUsers(client *mongodriver.Client) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		fmt.Println("/api/users called")
 		w.Header().Set("Content-Type", "application/json")
-		collection := client.Database("React").Collection("users")
+
+		pageStr := r.URL.Query().Get("page")
+		limitStr := r.URL.Query().Get("limit")
+
+		page, err := strconv.Atoi(pageStr)
+		if err != nil || page <= 0 {
+			page = 1
+		}
+		limit, err := strconv.Atoi(limitStr)
+		if err != nil || limit <= 0 {
+			limit = 5
+		}
+
 		ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 		defer cancel()
-		cursor, err := collection.Find(ctx, bson.M{})
+
+		users, total, err := mongo.GetPaginatedUser(ctx, page, limit)
 		if err != nil {
-			fmt.Println("Error finding users:", err)
-			http.Error(w, err.Error(), http.StatusInternalServerError)
-			return
-		}
-		defer cursor.Close(ctx)
-
-		var users []models.User
-		if err := cursor.All(ctx, &users); err != nil {
-			fmt.Println("Cursor decode error:", err)
+			fmt.Println("Error fetching paginated users:", err)
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 			return
 		}
 
-		fmt.Println("Users fetched:", users)
-		json.NewEncoder(w).Encode(users)
+		response := map[string]any{
+			"users": users,
+			"total": total,
+			"page":  page,
+			"limit": limit,
+		}
+
+		json.NewEncoder(w).Encode(response)
 	}
 }
