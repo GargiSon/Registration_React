@@ -11,7 +11,6 @@ const Main = () => {
   const [sortField, setSortField] = useState('_id');
   const [sortOrder, setSortOrder] = useState('desc');
   const navigate = useNavigate();
-
   const totalPages = Math.ceil(total / limit);
 
   useEffect(() => {
@@ -21,6 +20,7 @@ const Main = () => {
   const fetchUsers = async () => {
     try {
       const response = await getPosts(page, limit, sortField, sortOrder);
+      console.log("Fetched response:", response);
       if (response?.users && Array.isArray(response.users)) {
         setData(response.users);
         setTotal(response.total || 0);
@@ -36,7 +36,7 @@ const Main = () => {
 
   const handleSort = (field) => {
     if (field === sortField) {
-      setSortOrder((sortOrder === "asc" ? "desc" : "asc"));
+      setSortOrder(sortOrder === "asc" ? "desc" : "asc");
     } else {
       setSortField(field);
       setSortOrder("asc");
@@ -52,17 +52,27 @@ const Main = () => {
     return sortOrder === 'asc' ? ' ↑' : ' ↓';
   };
 
-  const handleDeleteUser = async (userId) => {
-  if (window.confirm('Are you sure you want to delete this user?')) {
-    try {
-      await deleteUser(userId);
-      fetchUsers(); // Refresh data after deletion
-    } catch (err) {
-      alert('Failed to delete user');
-    }
-  }
-};
+  const deleteUser = async (id) => {
+    if (window.confirm("Are you sure you want to delete this user?")) {
+      console.log("Deleting user ID:", id); 
+      try {
+        const response = await fetch(`http://localhost:5000/api/users/${id}`, {
+          method: 'DELETE',
+        });
 
+        const text = await response.text();
+        if (!response.ok) {
+          alert("Delete error: " + text);
+          return;
+        }
+
+        alert("User deleted successfully!");
+        fetchUsers(); //After deleting add refreshing line
+      } catch (error) {
+        alert("Delete error: " + error.message);
+      }
+    }
+  };
 
   return (
     <main>
@@ -101,8 +111,8 @@ const Main = () => {
                   <td>{user.email}</td>
                   <td>{user.mobile}</td>
                   <td>
-                    <button className='edit' onClick={() => navigate('/edit-user/{$user._id}')}>Edit</button>
-                    <button className='delete' onClick={() => handleDeleteUser(user._id)}>Delete</button>
+                    <button className='edit' onClick={() => navigate(`/edit-user/${user.id}`)}>Edit</button>
+                    <button className='delete' onClick={() => deleteUser(user.id)}>Delete</button>
                   </td>
                 </tr>
               ))}
