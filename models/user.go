@@ -30,3 +30,10 @@ type UsersListResponse struct {
 type ApiErrorResponse struct {
 	Error string `json:"error"`
 }
+
+type EditPageData struct {
+	Title     string          `json:"title"`
+	User      User            `json:"user"`
+	Countries []string        `json:"countries"`
+	SportsMap map[string]bool `json:"sportsMap"`
+}

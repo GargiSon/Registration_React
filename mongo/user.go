@@ -35,3 +35,14 @@ func DeleteUserByID(ctx context.Context, id primitive.ObjectID) (int64, error) {
 	}
 	return result.DeletedCount, nil
 }
+
+func FindUserByID(ctx context.Context, id primitive.ObjectID) (models.User, error) {
+	var user models.User
+	err := GetUserCollection().FindOne(ctx, bson.M{"_id": id}).Decode(&user)
+	return user, err
+}
+
+func UpdateUserByID(ctx context.Context, id primitive.ObjectID, update bson.M) error {
+	_, err := GetUserCollection().UpdateOne(ctx, bson.M{"_id": id}, bson.M{"$set": update})
+	return err
+}

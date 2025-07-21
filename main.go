@@ -19,7 +19,9 @@ func main() {
 	router := mux.NewRouter()
 	router.HandleFunc("/api/users", handlers.GetUsers(client)).Methods("GET")
 	router.HandleFunc("/api/users", handlers.RegisterUserAPI(client)).Methods("POST")
-	router.HandleFunc("/api/users/{id}", handlers.DeleteHandler).Methods("DELETE")
+	router.HandleFunc("/api/users/{id}", handlers.DeleteHandler(client)).Methods("DELETE")
+	router.HandleFunc("/api/users/{id}", handlers.GetUserHandler(client)).Methods("GET")
+	router.HandleFunc("/api/users/{id}", handlers.UpdateHandler(client)).Methods("PUT")
 	router.HandleFunc("/api/countries", handlers.GetCountries).Methods("GET")
 
 	handler := cors.AllowAll().Handler(router)

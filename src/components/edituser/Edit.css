@@ -1,0 +1,104 @@
+.edit-user-container {
+  max-width: 600px;
+  margin:80px auto;
+  background: #d7effa;
+  padding: 40px 40px;
+  border-radius: 10px;
+  box-shadow: 0 6px 15px rgba(0, 0, 0, 0.1);
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+.edit-user-container h2 {
+  text-align: center;
+  margin-bottom: 25px;
+  color: #2c3e50;
+}
+
+.edit-user-container table {
+  width: 100%;
+  border-spacing: 0 15px;
+}
+
+.edit-user-container td {
+  padding: 5px;
+  vertical-align: top;
+}
+
+.edit-user-container td:first-child {
+  width: 30%;
+  text-align: right;
+  padding-right: 10px;
+  font-weight: 500;
+}
+
+.edit-user-container td:last-child {
+  width: 70%;
+}
+
+.edit-user-container input[type="text"],
+.edit-user-container input[type="email"],
+.edit-user-container input[type="date"],
+.edit-user-container input[type="file"],
+.edit-user-container input[type="tel"],
+.edit-user-container select,
+.edit-user-container textarea {
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.edit-user-container input,
+.edit-user-container select,
+.edit-user-container textarea {
+  width: 100%;
+  padding: 10px;
+  border-radius: 5px;
+  border: 1px solid #ccc;
+  font-size: 14px;
+}
+
+.edit-user-container input[type="radio"],
+.edit-user-container input[type="checkbox"] {
+  width: auto;
+  margin-right: 5px;
+}
+
+.edit-user-container .required-star {
+  color: red;
+  margin-left: 4px;
+  font-weight: bold;
+}
+
+.edit-user-container .inline-options label {
+  margin-right: 15px;
+}
+
+.edit-user-container button {
+  padding: 10px 20px;
+  background-color: #007bff;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-weight: 500;
+}
+
+.edit-user-container button:hover {
+  background-color: #0056b3;
+}
+
+.edit-user-container input:focus,
+.edit-user-container select:focus,
+.edit-user-container textarea:focus {
+  outline: none;
+  border-color: #007bff;
+  box-shadow: 0 0 4px rgba(0, 123, 255, 0.5);
+}
+
+.edit-user-container .current-image {
+  text-align: center;
+}
+
+.edit-user-container .current-image img {
+  max-height: 100px;
+  display: block;
+  margin: 10px auto;
+}

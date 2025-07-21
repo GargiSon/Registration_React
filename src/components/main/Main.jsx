@@ -105,7 +105,7 @@ const Main = () => {
             </thead>
             <tbody>
               {data.map((user, index) => (
-                <tr key={user._id}>
+                <tr key={user.id}>
                   <td>{(page - 1) * limit + index + 1}</td>
                   <td>{user.username}</td>
                   <td>{user.email}</td>

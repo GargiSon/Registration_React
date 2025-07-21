@@ -4,6 +4,7 @@ import Header from './components/header/Header';
 import Footer from './components/footer/Footer';
 import Main from './components/main/Main';
 import AddUser from './components/adduser/AddUser';
+import Edit from './components/edituser/Edit';
 
 const Layout = () => {
   const location = useLocation();
@@ -16,6 +17,7 @@ const Layout = () => {
       <Routes>
         <Route path="/" element={<Main />} />
         <Route path="/add-user" element={<AddUser />} />
+        <Route path="/edit-user/:id" element={<Edit />} />
       </Routes>
 
       {!hideLayout && <Footer note="Footer note" />}

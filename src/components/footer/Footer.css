@@ -1,9 +1,19 @@
+.page-wrapper {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+}
+
+.page-content {
+  flex: 1;
+}
+
 .footer {
-  position: absolute;
-  bottom: 0px;
-  left: 0;
   width: 100%;
-  text-align: center;
   background-color: rgb(201, 231, 243);
   color: white;
+  text-align: center;
+  padding: 20px 0;
+  font-size: 24px;
+  font-weight: bold;
 }
