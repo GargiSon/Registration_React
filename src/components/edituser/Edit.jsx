@@ -127,23 +127,23 @@ const Edit = () => {
         <table>
           <tbody>
             <tr>
-              <td>Username:</td>
+              <td>Username: <span className="required-star">*</span></td>
               <td><input name="username" type="text" value={formData.username} onChange={handleChange} required /></td>
             </tr>
             <tr>
-              <td>Email:</td>
+              <td>Email: <span className="required-star">*</span></td>
               <td><input name="email" type="email" value={formData.email} disabled /></td>
             </tr>
             <tr>
-              <td>Mobile:</td>
+              <td>Mobile: <span className="required-star">*</span></td>
               <td><input name="mobile" type="tel" value={formData.mobile} onChange={handleChange} required /></td>
             </tr>
             <tr>
-              <td>Address:</td>
+              <td>Address: <span className="required-star">*</span></td>
               <td><textarea name="address" rows="3" value={formData.address} onChange={handleChange} required /></td>
             </tr>
             <tr>
-              <td>Gender:</td>
+              <td>Gender: <span className="required-star">*</span></td>
               <td>
                 <label><input type="radio" name="gender" value="Male" checked={formData.gender === "Male"} onChange={handleChange} /> Male</label>
                 <label><input type="radio" name="gender" value="Female" checked={formData.gender === "Female"} onChange={handleChange} /> Female</label>
@@ -180,11 +180,11 @@ const Edit = () => {
               </td>
             </tr>
             <tr>
-              <td>Date of Birth:</td>
+              <td>Date of Birth: <span className="required-star">*</span></td>
               <td><input name="dob" type="date" value={formData.dob} onChange={handleChange} required /></td>
             </tr>
             <tr>
-              <td>Country:</td>
+              <td>Country: <span className="required-star">*</span></td>
               <td>
                 <select name="country" value={formData.country} onChange={handleChange} required>
                   <option value="">Select your country</option>
