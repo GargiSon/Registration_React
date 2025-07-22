@@ -6,10 +6,14 @@ import Main from './components/main/Main';
 import AddUser from './components/adduser/AddUser';
 import Edit from './components/edituser/Edit';
 import Login from './components/login/Login';
+import ForgotPassword from './components/forgotPassword/Forgot';
 
 const Layout = () => {
   const location = useLocation();
-  const hideLayout = location.pathname === '/add-user';
+
+  // Routes which do not show header and Footer
+  const noLayoutRoutes = ['/add-user', '/login', '/forgot-password'];
+  const hideLayout = noLayoutRoutes.includes(location.pathname);
 
   return (
     <div className="App">
@@ -17,6 +21,7 @@ const Layout = () => {
       
       <Routes>
         <Route path='/login' element={<Login/>} />
+        <Route path='/forgot-password' element={<ForgotPassword/>} />
         <Route path="/" element={<Main />} />
         <Route path="/add-user" element={<AddUser />} />
         <Route path="/edit-user/:id" element={<Edit />} />
