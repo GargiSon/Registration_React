@@ -23,7 +23,7 @@ const Layout = () => {
       <Routes>
         <Route path='/login' element={<Login/>} />
         <Route path='/forgot-password' element={<ForgotPassword/>} />
-        <Route path='reset-password' element={<ResetPassword/>}/>
+        <Route path='/reset-password' element={<ResetPassword/>}/>
         <Route path="/" element={<Main />} />
         <Route path="/add-user" element={<AddUser />} />
         <Route path="/edit-user/:id" element={<Edit />} />

@@ -2,6 +2,9 @@ package utils
 
 import (
 	"context"
+	"crypto/rand"
+	"crypto/sha256"
+	"encoding/hex"
 	"my-react-app/mongo"
 	"net/http"
 	"time"
@@ -54,4 +57,15 @@ func GetFlashMessage(w http.ResponseWriter, r *http.Request) string {
 		MaxAge: -1,
 	})
 	return cookie.Value
+}
+
+func GenerateSecureToken(length int) string {
+	bytes := make([]byte, length)
+	_, _ = rand.Read(bytes)
+	return hex.EncodeToString(bytes)
+}
+
+func HashSHA256(data string) string {
+	hash := sha256.Sum256([]byte(data))
+	return hex.EncodeToString(hash[:])
 }

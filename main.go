@@ -22,7 +22,12 @@ func main() {
 	router.HandleFunc("/api/users/{id}", handlers.DeleteHandler(client)).Methods("DELETE")
 	router.HandleFunc("/api/users/{id}", handlers.GetUserHandler(client)).Methods("GET")
 	router.HandleFunc("/api/users/{id}", handlers.UpdateHandler(client)).Methods("PUT")
+
 	router.HandleFunc("/api/countries", handlers.GetCountries).Methods("GET")
+	router.HandleFunc("/api/forgot-password", handlers.ForgotPasswordHandler).Methods("POST")
+	router.HandleFunc("/api/login", handlers.LoginHandler).Methods("POST")
+	router.HandleFunc("/api/logout", handlers.LogoutHandler).Methods("GET")
+	router.HandleFunc("/api/reset-password", handlers.ResetHandler).Methods("POST")
 
 	handler := cors.AllowAll().Handler(router)
 
