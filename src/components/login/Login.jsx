@@ -35,9 +35,7 @@ const Login = () => {
         <main className='login-container'>
             <h2>Login</h2>
             <form onSubmit={handleLogin} className='login-form'>
-                <label>Email</label>
                 <input type='email' placeholder='Enter your email' value={email} onChange={(e) => setEmail(e.target.value)}/>
-                <label>Password</label>
                 <input type='password' placeholder='Enter your password' value={password} onChange={(e) => setPassword(e.target.value)}/>
 
                 <div className='login-buttons'>

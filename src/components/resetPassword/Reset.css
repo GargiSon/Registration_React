@@ -1,4 +1,4 @@
-.forgot-password-container {
+.reset-password-container {
   max-width: 700px;
   margin: 30px auto;
   background: rgb(201, 231, 243);
@@ -8,30 +8,19 @@
   font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
 }
 
-.forgot-password-container h2 {
+.reset-password-container h2 {
   text-align: center;
   margin-bottom: 25px;
   color: #333;
 }
 
-.forgot-password-form {
+.reset-password-form {
   display: flex;
   flex-direction: column;
   gap: 20px;
 }
 
-.forgot-password-container {
-  min-height: unset;
-}
-
-.forgot-password-form label {
-  font-weight: bold;
-  font-size: 16px;
-  color: #333;
-  margin-bottom: 5px;
-}
-
-.forgot-password-form input {
+.reset-password-form input {
   width: 100%;
   padding: 10px;
   border-radius: 5px;
@@ -42,18 +31,13 @@
   transition: border-color 0.3s ease, box-shadow 0.3s ease;
 }
 
-.forgot-password-form input:focus {
+.reset-password-form input:focus {
   outline: none;
   border-color: #007bff;
   box-shadow: 0 0 4px rgba(0, 123, 255, 0.5);
 }
 
-.send-email {
-  display: flex;
-  justify-content: flex-start;
-}
-
-.send-email button {
+.reset-password-form button {
   padding: 10px 20px;
   background-color: #007bff;
   color: white;
@@ -63,8 +47,21 @@
   font-size: 16px;
   font-weight: bold;
   margin-top: 10px;
+  align-self: flex-start;
 }
 
-.send-email button:hover {
+.reset-password-form button:hover {
   background-color: #0056b3;
+}
+
+.error {
+  color: #d93025;
+  font-size: 14px;
+  margin-top: -5px;
+}
+
+.success {
+  color: #34a853;
+  font-size: 14px;
+  margin-top: -5px;
 }
