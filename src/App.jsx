@@ -5,6 +5,7 @@ import Footer from './components/footer/Footer';
 import Main from './components/main/Main';
 import AddUser from './components/adduser/AddUser';
 import Edit from './components/edituser/Edit';
+import Login from './components/login/Login';
 
 const Layout = () => {
   const location = useLocation();
@@ -15,6 +16,7 @@ const Layout = () => {
       {!hideLayout && <Header title="Users Listing" subtitle="subtitle2" />}
       
       <Routes>
+        <Route path='/login' element={<Login/>} />
         <Route path="/" element={<Main />} />
         <Route path="/add-user" element={<AddUser />} />
         <Route path="/edit-user/:id" element={<Edit />} />

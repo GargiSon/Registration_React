@@ -25,3 +25,16 @@ export const updateUser = async (id, userData) => {
   });
   return await res.json();
 };
+
+export const loginUser = async (email, password) => {
+  try{
+    const response =  await axios.post('http://localhost:5000/api/login',{
+      email,
+      password
+    });
+    return response.data;
+  }catch(error){
+    console.error('Login API Error: ', error.response?.data || error.message);
+    throw error;
+  }
+};
