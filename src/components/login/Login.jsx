@@ -18,6 +18,7 @@ const Login = () => {
 
         try{
             const result = await loginUser(email, password);
+                console.log("Login result:", result);
                 alert("Login Successful!");
                 navigate('/');
             }catch(error){

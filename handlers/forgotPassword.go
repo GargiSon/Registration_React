@@ -55,7 +55,7 @@ func ForgotPasswordHandler(w http.ResponseWriter, r *http.Request) {
 	// Reset link
 	link := os.Getenv("AUTH_LINK")
 	if link == "" {
-		link = "http://localhost:5000/reset-password?token="
+		link = "http://localhost:5173/reset-password?token="
 	}
 	resetURL := link + rawToken
 
@@ -70,7 +70,7 @@ func ForgotPasswordHandler(w http.ResponseWriter, r *http.Request) {
 	writeJSON(w, http.StatusOK, models.ForgotResponse{Success: true, Message: msg})
 }
 
-func writeJSON(w http.ResponseWriter, status int, data interface{}) {
+func writeJSON(w http.ResponseWriter, status int, data any) {
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(status)
 	_ = json.NewEncoder(w).Encode(data)
