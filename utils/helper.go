@@ -5,11 +5,14 @@ import (
 	"crypto/rand"
 	"crypto/sha256"
 	"encoding/hex"
+	"log"
 	"my-react-app/mongo"
 	"net/http"
 	"time"
 
 	"go.mongodb.org/mongo-driver/bson"
+	"go.mongodb.org/mongo-driver/mongo/options"
+	"golang.org/x/crypto/bcrypt"
 )
 
 func GetCountriesFromDB() ([]string, error) {
@@ -35,6 +38,39 @@ func GetCountriesFromDB() ([]string, error) {
 		countries = append(countries, doc.Name)
 	}
 	return countries, nil
+}
+
+func SeedDefaultAdmin() {
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	defer cancel()
+
+	email := "gargi.soni@loginradius.com"
+	plainPassword := "tyu"
+
+	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(plainPassword), bcrypt.DefaultCost)
+	if err != nil {
+		log.Println("❌ Error creating password hash:", err)
+		return
+	}
+	collection := mongo.GetCollection("React", "admins")
+
+	filter := bson.M{"email": email}
+	update := bson.M{
+		"$set": bson.M{
+			"email":    email,
+			"password": string(hashedPassword),
+		},
+	}
+
+	opts := options.Update().SetUpsert(true)
+
+	result, err := collection.UpdateOne(ctx, filter, update, opts)
+	if err != nil {
+		log.Println("❌ Failed inserting/updating admin user:", err)
+		return
+	}
+	log.Printf("✅ Admin seeded. Matched: %v, Updated: %v, Upserted: %v",
+		result.MatchedCount, result.ModifiedCount, result.UpsertedID)
 }
 
 func SetFlashMessage(w http.ResponseWriter, message string) {

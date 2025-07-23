@@ -2,12 +2,12 @@ package mongo
 
 import (
 	"context"
+	"log"
 	"my-react-app/models"
 	"os"
 	"time"
 
 	"go.mongodb.org/mongo-driver/bson"
-	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
 func getDBName() string {
@@ -30,10 +30,17 @@ func CheckAdminExists(email string) (bool, error) {
 	return count > 0, err
 }
 
-func UpdateAdminPassword(ctx context.Context, adminID primitive.ObjectID, hashedPassword string) error {
-	_, err := GetCollection(getDBName(), "admins").
-		UpdateByID(ctx, adminID, bson.M{
+func UpdateAdminByEmail(ctx context.Context, email string, hashedPassword string) error {
+	result, err := GetCollection(getDBName(), "admins").
+		UpdateOne(ctx, bson.M{"email": email}, bson.M{
 			"$set": bson.M{"password": hashedPassword},
 		})
-	return err
+
+	if err != nil {
+		log.Println("Update error:", err)
+		return err
+	}
+
+	log.Printf("Matched %v document(s), Modified %v document(s)\n", result.MatchedCount, result.ModifiedCount)
+	return nil
 }

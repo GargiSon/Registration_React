@@ -23,7 +23,7 @@ func ForgotPasswordHandler(w http.ResponseWriter, r *http.Request) {
 	var req models.ForgotRequest
 	if err := json.NewDecoder(r.Body).Decode(&req); err != nil || req.Email == "" {
 		writeJSON(w, http.StatusBadRequest, models.ForgotResponse{
-			Success: false, Message: "Invalid email input",
+			Success: false, Message: "Invalid email email.",
 		})
 		return
 	}
