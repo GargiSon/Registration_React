@@ -24,7 +24,7 @@ const Login = () => {
             }catch(error){
                 console.error("Login error: ", error);
                 const errorMsg = error.response?.data?.message || error.message || "Login Failed. Try Again.";
-                alert(errorMsg);
+                alert("Login Failed");
         }
     };
 

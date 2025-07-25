@@ -2,6 +2,7 @@ import './Main.css';
 import { useEffect, useState } from 'react';
 import { getPosts } from '../../api';
 import { useNavigate } from 'react-router-dom';
+import { logoutUser } from '../logout/logout';
 
 const Main = () => {
   const [data, setData] = useState([]);
@@ -75,6 +76,17 @@ const Main = () => {
     }
   };
 
+  const handleLogout = async () => {
+    try{
+      await logoutUser();
+      alert('Logout out successfully');
+      navigate('/login');
+    }catch(error){
+      alert("Logout Failed!" + error.message);
+    }
+    fetchUsers();
+  };
+
   return (
     <main>
       <div className="top-bar">
@@ -82,6 +94,7 @@ const Main = () => {
         <button onClick={handleAddUser} className="add-user-btn">
           + Add User
         </button>
+        <button onClick={handleLogout} className='logout-btn'>Logout</button>
       </div>
 
       {data.length > 0 ? (
