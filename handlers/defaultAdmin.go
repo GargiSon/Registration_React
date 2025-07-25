@@ -6,7 +6,6 @@ import (
 	"net/http"
 )
 
-// SeedAdminHandler exposes an API route to trigger admin seeding
 func SeedAdminHandler(w http.ResponseWriter, r *http.Request) {
 	utils.SeedDefaultAdmin()
 

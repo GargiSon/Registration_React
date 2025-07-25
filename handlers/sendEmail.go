@@ -1,13 +1,25 @@
 package handlers
 
 import (
+	"bytes"
 	"fmt"
+	"html/template"
 	"os"
 
 	"gopkg.in/gomail.v2"
 )
 
 func sendResetEmail(toEmail, resetLink string) error {
+	tmpl, err := template.ParseFiles("templates/sendEmail.html")
+	if err != nil {
+		return fmt.Errorf("error parsing template: %w", err)
+	}
+
+	var bodyBuffer bytes.Buffer
+	err = tmpl.Execute(&bodyBuffer, struct{ Link string }{Link: resetLink})
+	if err != nil {
+		return fmt.Errorf("error executing template: %w", err)
+	}
 	email := os.Getenv("SMTP_EMAIL")
 	password := os.Getenv("SMTP_PASSWORD")
 
@@ -19,11 +31,7 @@ func sendResetEmail(toEmail, resetLink string) error {
 	m.SetHeader("From", email)
 	m.SetHeader("To", toEmail)
 	m.SetHeader("Subject", "Password Reset Link")
-	m.SetBody("text/html", fmt.Sprintf(`Hi,
-	We received a request to reset your password. Click the link below to set a new password: %s
-	If you didn't request this, you can safely ignore this email.
-	Thanks,
-	Gargi`, resetLink))
+	m.SetBody("text/html", bodyBuffer.String())
 
 	d := gomail.NewDialer("smtp.gmail.com", 587, email, password)
 
