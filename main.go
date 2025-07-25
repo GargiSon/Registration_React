@@ -33,7 +33,14 @@ func main() {
 
 	router.HandleFunc("/api/countries", handlers.RequireLogin(handlers.GetCountries)).Methods("GET")
 
-	handler := cors.AllowAll().Handler(router)
+	c := cors.New(cors.Options{
+		AllowedOrigins:   []string{"http://localhost:5173"},
+		AllowedMethods:   []string{"GET", "POST", "PUT", "DELETE", "OPTIONS"},
+		AllowedHeaders:   []string{"Authorization", "Content-Type"},
+		AllowCredentials: true, // allow cookies (sessions)
+	})
+
+	handler := c.Handler(router)
 
 	fmt.Println("Server running at http://localhost:5000")
 	log.Fatal(http.ListenAndServe(":5000", handler))

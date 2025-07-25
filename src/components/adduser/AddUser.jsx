@@ -22,20 +22,20 @@ const AddUser = () => {
   useEffect(() => {
     const fetchCountries = async () => {
       try {
-        const response = await fetch('http://localhost:5000/api/countries');
+        const response = await fetch('http://localhost:5000/api/countries',{
+          credentials: 'include',
+        });
         const data = await response.json();
         setCountries(data);
       } catch (error) {
         console.error("Failed to fetch countries:", error);
       }
     };
-
     fetchCountries();
   }, []);
 
   const handleChange = (e) => {
     const { name, value, type, files } = e.target;
-
     if (type === 'file') {
       setFormData((prev) => ({
         ...prev,
@@ -86,7 +86,8 @@ const AddUser = () => {
     try {
       const res = await fetch("http://localhost:5000/api/users", {
         method: "POST",
-        body: form
+        body: form,
+        credentials: 'include',
       });
 
       const text = await res.text();

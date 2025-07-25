@@ -40,15 +40,8 @@ const ResetPassword = () =>{
 
         try {
             await axios.post(`http://localhost:5000/api/reset-password?token=${token}`,
-                {
-                password: newPassword,
-                confirm: confirmPassword,
-                },
-                {
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                }
+                {password: newPassword, confirm: confirmPassword,},
+                {headers: {'Content-Type': 'application/json',},}
             );
 
         setSuccessMsg('Password reset successful! Redirecting to login...');

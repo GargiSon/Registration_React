@@ -24,7 +24,9 @@ const Edit = () => {
   useEffect(() => {
     const fetchUser = async () => {
       try {
-        const res = await fetch(`http://localhost:5000/api/users/${id}`);
+        const res = await fetch(`http://localhost:5000/api/users/${id}`,{
+          credentials: 'include',
+        });
         if (!res.ok) throw new Error(`HTTP error! Status: ${res.status}`);
         const data = await res.json();
         const fetchedUser = data.user;
@@ -49,7 +51,9 @@ const Edit = () => {
 
     const fetchCountries = async () => {
       try {
-        const response = await fetch('http://localhost:5000/api/countries');
+        const response = await fetch('http://localhost:5000/api/countries',{
+          credentials: 'include',
+        });
         const data = await response.json();
         setCountries(data || []);
       } catch (error) {
@@ -104,7 +108,8 @@ const Edit = () => {
     try {
       const res = await fetch(`http://localhost:5000/api/users/${id}`, {
         method: "PUT",
-        body: form
+        body: form,
+        credentials: 'include',
       });
 
       const text = await res.text();

@@ -6,6 +6,7 @@ import (
 	"net/http"
 	"os"
 	"strconv"
+	"strings"
 	"sync"
 	"time"
 )
@@ -81,7 +82,7 @@ func ClearSession(w http.ResponseWriter, r *http.Request) {
 			MaxAge:   -1,
 			HttpOnly: true,
 			Secure:   false,
-			SameSite: http.SameSiteLaxMode,
+			SameSite: http.SameSiteNoneMode,
 		})
 	}
 
@@ -102,6 +103,13 @@ func RequireLogin(next http.HandlerFunc) http.HandlerFunc {
 
 		_, ok := GetSessionEmail(r)
 		if !ok {
+			accept := r.Header.Get("Accept")
+			if strings.Contains(accept, "application/json") || strings.HasPrefix(r.URL.Path, "/api/") {
+				w.Header().Set("Content-Type", "application/json")
+				w.WriteHeader(http.StatusUnauthorized)
+				json.NewEncoder(w).Encode(map[string]string{"error": "unauthorized"})
+				return
+			}
 			http.Redirect(w, r, "/", http.StatusSeeOther)
 			return
 		}

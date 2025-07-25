@@ -19,6 +19,7 @@ const ForgotPassword = () => {
                 method: 'POST',
                 headers: {'Content-Type':'application/json'},
                 body: JSON.stringify({email}),
+                credentials: 'include',
             });
 
             const result = await response.json();

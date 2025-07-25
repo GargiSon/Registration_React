@@ -1,5 +1,5 @@
 import './Main.css';
-import React, { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { getPosts } from '../../api';
 import { useNavigate } from 'react-router-dom';
 
@@ -58,6 +58,7 @@ const Main = () => {
       try {
         const response = await fetch(`http://localhost:5000/api/users/${id}`, {
           method: 'DELETE',
+          credentials: 'include',
         });
 
         const text = await response.text();
