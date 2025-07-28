@@ -81,6 +81,11 @@
   font-weight: 500;
 }
 
+.edit-user-container button + button {
+  margin-left: 10px;
+}
+
+
 .edit-user-container button:hover {
   background-color: #0056b3;
 }
