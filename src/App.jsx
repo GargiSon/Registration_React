@@ -8,12 +8,14 @@ import Edit from './components/edituser/Edit';
 import Login from './components/login/Login';
 import ForgotPassword from './components/forgotPassword/Forgot';
 import ResetPassword from './components/resetPassword/Reset';
+import ProtectedRoute from './ProtectedRoute';
+import { Navigate } from 'react-router-dom';
 
 const Layout = () => {
   const location = useLocation();
 
   // Routes which do not show header and Footer
-  const noLayoutRoutes = ['/add-user', '/login', '/forgot-password', '/reset-password'];
+  const noLayoutRoutes = ['/login', '/forgot-password', '/reset-password'];
   const hideLayout = noLayoutRoutes.includes(location.pathname);
 
   return (
@@ -24,9 +26,13 @@ const Layout = () => {
         <Route path='/login' element={<Login/>} />
         <Route path='/forgot-password' element={<ForgotPassword/>} />
         <Route path='/reset-password' element={<ResetPassword/>}/>
-        <Route path="/" element={<Main />} />
-        <Route path="/add-user" element={<AddUser />} />
-        <Route path="/edit-user/:id" element={<Edit />} />
+
+        <Route element={<ProtectedRoute />}>
+          <Route path="/" element={<Main />} />
+          <Route path="/add-user" element={<AddUser />} />
+          <Route path="/edit-user/:id" element={<Edit />} />
+        </Route>
+        <Route path="*" element={<Navigate to="/login" replace />} />
       </Routes>
 
       {!hideLayout && <Footer note="Footer note" />}
