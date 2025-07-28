@@ -1,15 +1,18 @@
-import React from 'react';
+import axios from "axios";
+
 
 export const logoutUser = async () => {
-  const response = await fetch('http://localhost:5000/api/logout', {
-    method: 'GET', 
-    credentials: 'include',
-  });
-
-  if (!response.ok) {
-    const error = await response.text();
-    throw new Error(error || 'Logout failed');
+  try{
+    const response = await axios.get('http://localhost:5000/api/logout', {
+      withCredentials: true,
+    });
+    return response.data;
+  } catch (error) {
+    const errorMsg =
+      error.response?.data?.message ||
+      error.response?.data ||
+      error.message ||
+      'Logout failed';
+    throw new Error(errorMsg);
   }
-
-  return response.json();
 };

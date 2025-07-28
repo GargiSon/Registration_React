@@ -3,6 +3,7 @@ import { useEffect, useState } from 'react';
 import { getPosts } from '../../api';
 import { useNavigate } from 'react-router-dom';
 import { logoutUser } from '../logout/logout';
+import axios from 'axios';
 
 const Main = () => {
   const [data, setData] = useState([]);
@@ -30,10 +31,12 @@ const Main = () => {
       } else {
         console.error('Invalid API response structure:', response);
         setData([]);
+        setTotal(0);
       }
     } catch (err) {
       console.error('Error Fetching users:', err);
       setData([]);
+      setTotal(0);
     }
   };
 
@@ -59,21 +62,17 @@ const Main = () => {
     if (window.confirm("Are you sure you want to delete this user?")) {
       console.log("Deleting user ID:", id); 
       try {
-        const response = await fetch(`http://localhost:5000/api/users/${id}`, {
-          method: 'DELETE',
-          credentials: 'include',
+        const response = await axios.delete(`http://localhost:5000/api/users/${id}`, {
+          withCredentials : true,
         });
-
-        const text = await response.text();
-        if (!response.ok) {
-          alert("Delete error: " + text);
-          return;
-        }
 
         setMessage('User deleted successfully!');
         setTimeout(() => setMessage(''), 3000);
+        fetchUsers();
       } catch (error) {
-        alert("Delete error: " + error.message);
+        const errorMsg =
+          error.response?.data?.message || error.message || 'Unknown error';
+        alert('Delete error: ' + errorMsg);
       }
     }
   };
@@ -86,7 +85,6 @@ const Main = () => {
     }catch(error){
       alert("Logout Failed!" + error.message);
     }
-    fetchUsers();
   };
 
   return (
@@ -95,9 +93,7 @@ const Main = () => {
         {logoutMessage && <p className="success-msg">{logoutMessage}</p>}
         {message && <p className="success-msg">{message}</p>}
         <h2>Users List</h2>
-        <button onClick={handleAddUser} className="add-user-btn">
-          + Add User
-        </button>
+        <button onClick={handleAddUser} className="add-user-btn">+ Add User</button>
         <button onClick={handleLogout} className='logout-btn'>Logout</button>
       </div>
 

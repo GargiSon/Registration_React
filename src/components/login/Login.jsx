@@ -8,6 +8,7 @@ const Login = () => {
     const [password, setPassword] = useState('');
     const [loginSuccess, setLoginSuccess] = useState(false);
     const [loginError, setLoginError] = useState('');
+    const [loading, setLoading] = useState(false);
     const navigate = useNavigate();
 
     const handleLogin = async (e) => {
@@ -21,6 +22,7 @@ const Login = () => {
         }
 
         try{
+            setLoading(true);
             const result = await loginUser(email, password);
             console.log("Login result:", result);
             setLoginSuccess(true);
@@ -31,6 +33,8 @@ const Login = () => {
             setLoginError(errorMsg);
             setLoginSuccess(false);
             setTimeout(() => setLoginError(''), 3000);
+        } finally {
+            setLoading(false);
         }
     };
 
@@ -42,12 +46,12 @@ const Login = () => {
         <main className='login-container'>
             <h2>Login</h2>
             <form onSubmit={handleLogin} className='login-form'>
-                <input type='email' placeholder='Enter your email' value={email} onChange={(e) => setEmail(e.target.value)}/>
-                <input type='password' placeholder='Enter your password' value={password} onChange={(e) => setPassword(e.target.value)}/>
+                <input type='email' placeholder='Enter your email' value={email} onChange={(e) => setEmail(e.target.value)} disabled = {loading} required/>
+                <input type='password' placeholder='Enter your password' value={password} onChange={(e) => setPassword(e.target.value)} disabled={loading} required/>
 
                 <div className='login-buttons'>
-                    <button type='submit'>Login</button>
-                    <button type='button' onClick={handleForgotPassword}>Forgot Password</button>
+                    <button type='submit' disabled={loading}>{loading ? 'Logging in...' : 'Login'}</button>
+                    <button type='button' onClick={handleForgotPassword} disabled={loading}>Forgot Password</button>
                 </div>
 
                 {loginSuccess && (<p className='login-success-message'>Login successful!</p>)}

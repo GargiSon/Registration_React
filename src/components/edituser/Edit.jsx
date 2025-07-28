@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import './Edit.css';
+import axios from 'axios';
 
 const Edit = () => {
   const { id } = useParams();
@@ -21,15 +22,17 @@ const Edit = () => {
     country: ''
   });
 
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState('');
+
   useEffect(() => {
     const fetchUser = async () => {
       try {
-        const res = await fetch(`http://localhost:5000/api/users/${id}`,{
-          credentials: 'include',
+        const res = await axios.get(`http://localhost:5000/api/users/${id}`,{
+          withCredentials: true,
         });
-        if (!res.ok) throw new Error(`HTTP error! Status: ${res.status}`);
-        const data = await res.json();
-        const fetchedUser = data.user;
+
+        const fetchedUser = res.data.user;
 
         setFormData(prev => ({
           ...prev,
@@ -42,22 +45,27 @@ const Edit = () => {
           country: fetchedUser.country || '',
           sports: (fetchedUser.sports || '').split(',').map(s => s.trim()).filter(Boolean),
           imageBase64: fetchedUser.imageBase64 || '',
-          image: null
+          image: null,
+          removeImage: false,
         }));
+        setError('');
       } catch (error) {
         console.error("Error fetching user:", error);
+        setError('Failed to load user data. Please try again later.');
+      } finally {
+        setLoading(false);
       }
     };
 
     const fetchCountries = async () => {
       try {
-        const response = await fetch('http://localhost:5000/api/countries',{
-          credentials: 'include',
+        const response = await axios.get('http://localhost:5000/api/countries',{
+          withCredentials : true,
         });
-        const data = await response.json();
-        setCountries(data || []);
+        setCountries(response.data || []);
       } catch (error) {
         console.error("Failed to fetch countries:", error);
+        setError('Failed to load countries. Please try again later.');
       }
     };
 
@@ -79,6 +87,9 @@ const Edit = () => {
       });
     } else if (type === 'checkbox' && name === 'removeImage') {
       setFormData(prev => ({ ...prev, removeImage: checked }));
+      if (checked) {
+        setFormData(prev => ({ ...prev, image: null }));
+      }
     } else {
       setFormData(prev => ({ ...prev, [name]: value }));
     }
@@ -86,6 +97,8 @@ const Edit = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    setError('');
+    setLoading(true);
 
     const form = new FormData();
     form.append("username", formData.username);
@@ -106,34 +119,39 @@ const Edit = () => {
     }
 
     try {
-      const res = await fetch(`http://localhost:5000/api/users/${id}`, {
-        method: "PUT",
-        body: form,
-        credentials: 'include',
+      const res = await axios.put(`http://localhost:5000/api/users/${id}`, form, {
+        headers: {
+          'Content-Type' : 'multipart/form-data',
+        },
+        withCredentials: true,
       });
 
-      const text = await res.text();
-
-      if (res.ok) {
-        alert("User updated successfully!");
-        navigate("/");
-      } else {
-        alert("Error updating user: " + text);
-      }
+      alert("User updated successfully!");
+      navigate("/");
     } catch (error) {
-      alert("Network or server error occurred.");
+      const errMsg =
+        error.response?.data?.message ||
+        error.response?.data ||
+        error.message ||
+        'Failed to update user.';
+      setError(errMsg);
+      console.error("Error updating user:", error);
+    } finally {
+      setLoading(false);
     }
   };
 
   return (
     <div className="edit-user-container">
       <h2>Edit User</h2>
+      {error && <p className="error-msg" style={{ color: 'red' }}>{error}</p>}
+      {loading && <p>Loading...</p>}
       <form onSubmit={handleSubmit} encType="multipart/form-data">
         <table>
           <tbody>
             <tr>
               <td>Username: <span className="required-star">*</span></td>
-              <td><input name="username" type="text" value={formData.username} onChange={handleChange} required /></td>
+              <td><input name="username" type="text" value={formData.username} onChange={handleChange} required disabled={loading}/></td>
             </tr>
             <tr>
               <td>Email: <span className="required-star">*</span></td>
@@ -141,17 +159,17 @@ const Edit = () => {
             </tr>
             <tr>
               <td>Mobile: <span className="required-star">*</span></td>
-              <td><input name="mobile" type="tel" value={formData.mobile} onChange={handleChange} required /></td>
+              <td><input name="mobile" type="tel" value={formData.mobile} onChange={handleChange} required disabled={loading}/></td>
             </tr>
             <tr>
               <td>Address: <span className="required-star">*</span></td>
-              <td><textarea name="address" rows="3" value={formData.address} onChange={handleChange} required /></td>
+              <td><textarea name="address" rows="3" value={formData.address} onChange={handleChange} required disabled={loading}/></td>
             </tr>
             <tr>
               <td>Gender: <span className="required-star">*</span></td>
               <td>
-                <label><input type="radio" name="gender" value="Male" checked={formData.gender === "Male"} onChange={handleChange} /> Male</label>
-                <label><input type="radio" name="gender" value="Female" checked={formData.gender === "Female"} onChange={handleChange} /> Female</label>
+                <label><input type="radio" name="gender" value="Male" checked={formData.gender === "Male"} onChange={handleChange} disabled={loading}/> Male</label>
+                <label><input type="radio" name="gender" value="Female" checked={formData.gender === "Female"} onChange={handleChange} disabled={loading}/> Female</label>
               </td>
             </tr>
             <tr>
@@ -168,30 +186,30 @@ const Edit = () => {
             </tr>
             <tr>
               <td>Upload New Image:</td>
-              <td><input name="image" type="file" accept="image/*" onChange={handleChange} /></td>
+              <td><input name="image" type="file" accept="image/*" onChange={handleChange} disabled={loading || formData.removeImage}/></td>
             </tr>
             <tr>
               <td>Remove Image:</td>
               <td>
-                <label><input type="checkbox" name="removeImage" checked={formData.removeImage} onChange={handleChange} /> Check to remove current image</label>
+                <label><input type="checkbox" name="removeImage" checked={formData.removeImage} onChange={handleChange} disabled={loading}/> Check to remove current image</label>
               </td>
             </tr>
             <tr>
               <td>Sports:</td>
               <td>
-                <label><input type="checkbox" name="sports" value="basketball" checked={formData.sports.includes("basketball")} onChange={handleChange} /> Basketball</label>
-                <label><input type="checkbox" name="sports" value="swimming" checked={formData.sports.includes("swimming")} onChange={handleChange} /> Swimming</label>
-                <label><input type="checkbox" name="sports" value="cricket" checked={formData.sports.includes("cricket")} onChange={handleChange} /> Cricket</label>
+                <label><input type="checkbox" name="sports" value="basketball" checked={formData.sports.includes("basketball")} onChange={handleChange} disabled={loading}/> Basketball</label>
+                <label><input type="checkbox" name="sports" value="swimming" checked={formData.sports.includes("swimming")} onChange={handleChange} disabled={loading}/> Swimming</label>
+                <label><input type="checkbox" name="sports" value="cricket" checked={formData.sports.includes("cricket")} onChange={handleChange} disabled={loading}/> Cricket</label>
               </td>
             </tr>
             <tr>
               <td>Date of Birth: <span className="required-star">*</span></td>
-              <td><input name="dob" type="date" value={formData.dob} onChange={handleChange} required /></td>
+              <td><input name="dob" type="date" value={formData.dob} onChange={handleChange} required disabled={loading}/></td>
             </tr>
             <tr>
               <td>Country: <span className="required-star">*</span></td>
               <td>
-                <select name="country" value={formData.country} onChange={handleChange} required>
+                <select name="country" value={formData.country} onChange={handleChange} required disabled={loading}>
                   <option value="">Select your country</option>
                   {countries.map((country, idx) => (
                     <option key={idx} value={country}>{country}</option>
@@ -201,8 +219,8 @@ const Edit = () => {
             </tr>
             <tr>
               <td colSpan="2" style={{ textAlign: 'center' }}>
-                <button type="submit">Update User</button>
-                <button type="button" onClick={() => navigate('/')}>Cancel</button>
+                <button type="submit" disabled={loading}>{loading ? 'Updating...' : 'Update User'}</button>
+                <button type="button" onClick={() => navigate('/')} disabled={loading}>Cancel</button>
               </td>
             </tr>
           </tbody>

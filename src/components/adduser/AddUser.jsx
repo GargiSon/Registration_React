@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import './AddUser.css';
+import axios from 'axios';
 
 const AddUser = () => {
   const navigate = useNavigate();
@@ -19,34 +20,39 @@ const AddUser = () => {
     country: ''
   });
 
+  const [error, setError] = useState('');
+  const [loading, setLoading] = useState(false);
+
   useEffect(() => {
     const fetchCountries = async () => {
       try {
-        const response = await fetch('http://localhost:5000/api/countries',{
-          credentials: 'include',
+        const response = await axios.get('http://localhost:5000/api/countries',{
+          withCredentials : true,
         });
-        const data = await response.json();
-        setCountries(data);
+        setCountries(response.data);
       } catch (error) {
         console.error("Failed to fetch countries:", error);
+        setError("Failed to load countries. Please try again later.");
       }
     };
     fetchCountries();
   }, []);
 
   const handleChange = (e) => {
-    const { name, value, type, files } = e.target;
+    const { name, value, type, files, checked } = e.target;
     if (type === 'file') {
       setFormData((prev) => ({
         ...prev,
-        [name]: files[0]
+        [name]: files[0] || null
       }));
     } else if (type === 'checkbox') {
-      const checked = e.target.checked;
-      setFormData((prev) => {
-        const sports = checked
-          ? [...prev.sports, value]
-          : prev.sports.filter((sport) => sport !== value);
+      setFormData(prev => {
+        let sports = [...prev.sports];
+        if (checked) {
+          if (!sports.includes(value)) sports.push(value);
+        } else {
+          sports = sports.filter(sport => sport !== value);
+        }
         return { ...prev, sports };
       });
     } else {
@@ -59,6 +65,12 @@ const AddUser = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    setError('');
+
+    if (formData.password !== formData.confirm) {
+      setError("Password and Confirm Password do not match.");
+      return;
+    }
 
     const form = new FormData();
     form.append("username", formData.username);
@@ -71,42 +83,39 @@ const AddUser = () => {
     form.append("dob", formData.dob);
     form.append("country", formData.country);
 
-    // File input
     if (formData.image instanceof File) {
       form.append("image", formData.image);
     }
 
-    // Sports (assume it's a list/array in formData.sports)
-    if (Array.isArray(formData.sports)) {
-      formData.sports.forEach(s => form.append("sports", s));
-    } else if (formData.sports) {
-      form.append("sports", formData.sports);
-    }
+    formData.sports.forEach(s => form.append("sports", s));
 
     try {
-      const res = await fetch("http://localhost:5000/api/users", {
-        method: "POST",
-        body: form,
-        credentials: 'include',
+      setLoading(true);
+      const res = await axios.post("http://localhost:5000/api/users", form, {
+        headers: {
+          'Content-Type' : 'multipart/form-data'
+        },
+        withCredentials: true,
       });
-
-      const text = await res.text();
-
-      if (res.ok) {
-        alert("User added successfully!");
-        navigate("/");
-      } else {
-        alert(`Error adding user: ${text}`);
-      }
-    } catch (error) {
+      alert("User added successfully!");
+      navigate("/");
+    }catch (error) {
+      const errMsg = 
+        error.response?.data?.message ||
+        error.response?.data ||
+        error.message ||
+        "Server error occurred.";
+      setError(errMsg);
       console.error("Failed to add user:", error);
-      alert("Network or server error occurred.");
+    } finally {
+      setLoading(false);
     }
   };
 
   return (
     <div className="add-user-container">
       <h2>Add New User</h2>
+      {error && <p className="error-msg" style={{ color: 'red' }}>{error}</p>}
       <form onSubmit={handleSubmit} encType="multipart/form-data">
         <table>
           <tbody>
