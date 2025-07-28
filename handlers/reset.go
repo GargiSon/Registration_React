@@ -16,85 +16,85 @@ import (
 func ResetHandler(w http.ResponseWriter, r *http.Request) {
 	setNoCacheHeaders(w)
 
-	// Only POST supported
 	if r.Method != http.MethodPost {
-		log.Println("ResetHandler: Method not allowed")
 		http.Error(w, "Method Not Allowed", http.StatusMethodNotAllowed)
 		return
 	}
 
 	rawToken := r.URL.Query().Get("token")
 	if rawToken == "" {
-		log.Println("ResetHandler: No token provided")
 		http.Error(w, "Token not provided", http.StatusBadRequest)
 		return
 	}
 
 	tokenHash := utils.HashSHA256(rawToken)
-	log.Println("ResetHandler: Token hash generated")
 
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
 
 	tokenData, err := mongo.FindResetToken(ctx, tokenHash)
 	if err != nil {
-		log.Println("ResetHandler: Invalid or expired token:", err)
-		w.WriteHeader(http.StatusUnauthorized)
-		json.NewEncoder(w).Encode(models.ResetPasswordResponse{Error: "Invalid or expired token"})
+		writeJSONError(w, http.StatusUnauthorized, "Invalid or expired token")
 		return
 	}
-	log.Printf("ResetHandler: Found token for user ID %s\n", tokenData.UserID.Hex())
 
 	if time.Now().Unix() > tokenData.TokenExpiry {
-		log.Println("ResetHandler: Token expired, deleting from DB")
-		_ = mongo.DeleteResetTokensByUserID(ctx, tokenData.UserID)
-		w.WriteHeader(http.StatusUnauthorized)
-		json.NewEncoder(w).Encode(models.ResetPasswordResponse{Error: "Token expired"})
+		if delErr := mongo.DeleteResetTokensByUserID(ctx, tokenData.UserID); delErr != nil {
+			log.Println("Failed to delete expired token:", delErr)
+		}
+		writeJSONError(w, http.StatusUnauthorized, "Token expired")
 		return
 	}
 
-	// Parse body
+	var admin models.Admin
+	if err := mongo.GetAdminByID(ctx, tokenData.UserID, &admin); err != nil {
+		writeJSONError(w, http.StatusInternalServerError, "Failed to find admin for token")
+		return
+	}
+	if admin.Email == "" {
+		writeJSONError(w, http.StatusInternalServerError, "Admin email missing")
+		return
+	}
+
+	defer r.Body.Close()
 	var req models.ResetPasswordRequest
 	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
-		log.Println("ResetHandler: Error decoding JSON body:", err)
-		http.Error(w, "Invalid JSON body", http.StatusBadRequest)
+		writeJSONError(w, http.StatusBadRequest, "Invalid JSON body")
 		return
 	}
-	log.Println("ResetHandler: Parsed JSON body")
 
 	if req.Password != req.Confirm {
-		log.Println("ResetHandler: Passwords do not match")
-		w.WriteHeader(http.StatusBadRequest)
-		json.NewEncoder(w).Encode(models.ResetPasswordResponse{Error: "Passwords do not match"})
+		writeJSONError(w, http.StatusBadRequest, "Passwords do not match")
 		return
 	}
-	log.Println("ResetHandler: Passwords match")
 
-	// Hash the new password securely using bcrypt
+	if len(req.Password) > 128 {
+		writeJSONError(w, http.StatusBadRequest, "Password too long")
+		return
+	}
+
 	hashedPass, err := bcrypt.GenerateFromPassword([]byte(req.Password), bcrypt.DefaultCost)
 	if err != nil {
-		log.Println("ResetHandler: Failed to hash password:", err)
 		http.Error(w, "Failed to hash password", http.StatusInternalServerError)
 		return
 	}
-	log.Println("ResetHandler: Password hashed successfully")
 
-	err = mongo.UpdateAdminByEmail(ctx, tokenData.Email, string(hashedPass))
-
+	err = mongo.UpdateAdminByEmail(ctx, admin.Email, string(hashedPass))
 	if err != nil {
-		log.Println("ResetHandler: Failed to update password in DB:", err)
 		http.Error(w, "Failed to update password", http.StatusInternalServerError)
 		return
 	}
-	log.Printf("ResetHandler: Password updated for user ID %s\n", tokenData.UserID.Hex())
 
-	err = mongo.DeleteResetTokensByUserID(ctx, tokenData.UserID)
-	if err != nil {
-		log.Println("ResetHandler: Failed to delete reset token after successful reset:", err)
-	} else {
-		log.Println("ResetHandler: Reset token deleted successfully")
+	if err = mongo.DeleteResetTokensByUserID(ctx, tokenData.UserID); err != nil {
+		log.Println("Failed to delete reset token after successful reset:", err)
 	}
 
+	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(models.ResetPasswordResponse{Message: "Password reset successful"})
-	log.Println("ResetHandler: Password reset process completed")
+}
+
+func writeJSONError(w http.ResponseWriter, status int, message string) {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(status)
+	json.NewEncoder(w).Encode(models.ResetPasswordResponse{Error: message})
 }

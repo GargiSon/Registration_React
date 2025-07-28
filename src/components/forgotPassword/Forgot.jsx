@@ -24,7 +24,7 @@ const ForgotPassword = () => {
             {email},
             {withCredentials: true}
         );
-        alert(response.message || "Reset link sent to your email.");
+        alert(response.message || "If email exists reset link is sent.");
         navigate('/login');
         }catch (err){
             const errMsg = err.response?.data?.message || 'Error sending email. Please try again.';
