@@ -159,3 +159,10 @@ thead {
 .delete-btn:hover {
   background-color: #d81b1b;
 }
+
+.success-msg {
+  color: green;
+  font-weight: bold;
+  text-align: center;
+  margin: 10px 0;
+}

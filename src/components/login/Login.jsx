@@ -6,25 +6,31 @@ import {loginUser} from '../../api'
 const Login = () => {
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
+    const [loginSuccess, setLoginSuccess] = useState(false);
+    const [loginError, setLoginError] = useState('');
     const navigate = useNavigate();
 
     const handleLogin = async (e) => {
         e.preventDefault();
 
         if(!email || !password){
-            alert("Please fill in all fields.");
+            setLoginError("Please fill in all fields.");
+            setLoginSuccess(false);
+            setTimeout(() => setLoginError(''), 3000);
             return;
         }
 
         try{
             const result = await loginUser(email, password);
-                console.log("Login result:", result);
-                alert("Login Successful!");
-                navigate('/');
-            }catch(error){
-                console.error("Login error: ", error);
-                const errorMsg = error.response?.data?.message || error.message || "Login Failed. Try Again.";
-                alert("Login Failed");
+            console.log("Login result:", result);
+            setLoginSuccess(true);
+            setTimeout(() => navigate('/'), 1500);
+        }catch(error){
+            console.error("Login error: ", error);
+            const errorMsg = error.response?.data?.message || "Login failed. Please try again.";
+            setLoginError(errorMsg);
+            setLoginSuccess(false);
+            setTimeout(() => setLoginError(''), 3000);
         }
     };
 
@@ -43,6 +49,9 @@ const Login = () => {
                     <button type='submit'>Login</button>
                     <button type='button' onClick={handleForgotPassword}>Forgot Password</button>
                 </div>
+
+                {loginSuccess && (<p className='login-success-message'>Login successful!</p>)}
+                {loginError && <p className='login-error-message'>{loginError}</p>}
             </form>
         </main>
     );

@@ -11,6 +11,8 @@ const Main = () => {
   const [total, setTotal] = useState(0);
   const [sortField, setSortField] = useState('_id');
   const [sortOrder, setSortOrder] = useState('desc');
+  const [logoutMessage, setLogoutMessage] = useState('');
+  const [message, setMessage] = useState('');
   const navigate = useNavigate();
   const totalPages = Math.ceil(total / limit);
 
@@ -68,8 +70,8 @@ const Main = () => {
           return;
         }
 
-        alert("User deleted successfully!");
-        fetchUsers(); //After deleting add refreshing line
+        setMessage('User deleted successfully!');
+        setTimeout(() => setMessage(''), 3000);
       } catch (error) {
         alert("Delete error: " + error.message);
       }
@@ -79,8 +81,8 @@ const Main = () => {
   const handleLogout = async () => {
     try{
       await logoutUser();
-      alert('Logout out successfully');
-      navigate('/login');
+      setLogoutMessage('Logout successful!');
+      setTimeout(() => navigate('/login'), 1500);
     }catch(error){
       alert("Logout Failed!" + error.message);
     }
@@ -90,6 +92,8 @@ const Main = () => {
   return (
     <main>
       <div className="top-bar">
+        {logoutMessage && <p className="success-msg">{logoutMessage}</p>}
+        {message && <p className="success-msg">{message}</p>}
         <h2>Users List</h2>
         <button onClick={handleAddUser} className="add-user-btn">
           + Add User
