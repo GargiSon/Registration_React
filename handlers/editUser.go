@@ -104,7 +104,7 @@ func UpdateHandler(client *mongodriver.Client) http.HandlerFunc {
 		mobile := r.FormValue("mobile")
 		address := r.FormValue("address")
 		gender := r.FormValue("gender")
-		dobStr := r.FormValue("dob")
+		dob := r.FormValue("dob")
 		country := r.FormValue("country")
 		sports := strings.Join(r.Form["sports"], ",")
 		removeImage := r.FormValue("remove_image") == "1"
@@ -114,10 +114,13 @@ func UpdateHandler(client *mongodriver.Client) http.HandlerFunc {
 			http.Error(w, `{"error":"Invalid mobile format"}`, http.StatusBadRequest)
 			return
 		}
-		dob, err := time.Parse("2006-01-02", dobStr)
-		if err != nil || dob.After(time.Now()) {
-			http.Error(w, `{"error":"Invalid DOB"}`, http.StatusBadRequest)
-			return
+
+		if dob != "" {
+			parsedDOB, err := time.Parse("2006-01-02", dob)
+			if err != nil || parsedDOB.After(time.Now()) {
+				http.Error(w, "Invalid or future DOB", http.StatusBadRequest)
+				return
+			}
 		}
 
 		ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
@@ -129,7 +132,7 @@ func UpdateHandler(client *mongodriver.Client) http.HandlerFunc {
 			"address":  address,
 			"gender":   gender,
 			"sports":   sports,
-			"dob":      dobStr,
+			"dob":      dob,
 			"country":  country,
 		}
 
